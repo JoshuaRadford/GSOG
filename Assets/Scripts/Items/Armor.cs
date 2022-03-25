@@ -1,8 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class Armor : Item
-{
-    public List<StatModifier> statModifiers;
+public class Armor : Item {
+    public List<StatMod> statModifiers;
 }

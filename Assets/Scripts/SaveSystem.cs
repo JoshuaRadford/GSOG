@@ -11,12 +11,9 @@
  */
 
 using System.IO;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public static class SaveSystem {
-
     private const string SAVE_EXTENSION = "txt";
 
     private static readonly string SAVE_FOLDER = Application.dataPath + "/Saves/";
@@ -53,7 +50,8 @@ public static class SaveSystem {
         if (File.Exists(SAVE_FOLDER + fileName + "." + SAVE_EXTENSION)) {
             string saveString = File.ReadAllText(SAVE_FOLDER + fileName + "." + SAVE_EXTENSION);
             return saveString;
-        } else {
+        }
+        else {
             return null;
         }
     }
@@ -68,7 +66,8 @@ public static class SaveSystem {
         foreach (FileInfo fileInfo in saveFiles) {
             if (mostRecentFile == null) {
                 mostRecentFile = fileInfo;
-            } else {
+            }
+            else {
                 if (fileInfo.LastWriteTime > mostRecentFile.LastWriteTime) {
                     mostRecentFile = fileInfo;
                 }
@@ -79,7 +78,8 @@ public static class SaveSystem {
         if (mostRecentFile != null) {
             string saveString = File.ReadAllText(mostRecentFile.FullName);
             return saveString;
-        } else {
+        }
+        else {
             return null;
         }
     }
@@ -100,7 +100,8 @@ public static class SaveSystem {
         if (saveString != null) {
             TSaveObject saveObject = JsonUtility.FromJson<TSaveObject>(saveString);
             return saveObject;
-        } else {
+        }
+        else {
             return default(TSaveObject);
         }
     }
@@ -111,7 +112,8 @@ public static class SaveSystem {
         if (saveString != null) {
             TSaveObject saveObject = JsonUtility.FromJson<TSaveObject>(saveString);
             return saveObject;
-        } else {
+        }
+        else {
             return default(TSaveObject);
         }
     }

@@ -1,88 +1,65 @@
-using System;
-using System.Linq;
 using System.Collections.Generic;
-using UnityEngine;
 
-    public class Stat
-    {
-        protected string _name;
-        protected float _baseValue;
-        protected float _modifiedValue;
-        public virtual string Name { get { return _name; } set { _name = value; } }
-        public virtual float BaseValue { get { return _baseValue; } set { _baseValue = value; } }
-        public virtual float ModifiedValue
-        {
-            get
-            {
-                _modifiedValue = ApplyModifiers(_baseValue, _baseValueModifiers);
-                return _modifiedValue;
+[System.Serializable]
+public class Stat {
+    public virtual string Name { get; }
+    public virtual int BaseValue { get; set; }
+    public virtual int ModifiedValue => (int)ApplyModifiers(BaseValue, BaseValueModifiers);
+    public virtual List<StatMod> BaseValueModifiers { get; }
+
+    [Newtonsoft.Json.JsonConstructor]
+    public Stat(string name, int baseValue = 5) {
+        Name = name;
+        BaseValue = baseValue;
+        BaseValueModifiers = new List<StatMod>();
+    }
+
+    public void AddModifier(StatMod modToAdd, List<StatMod> addTo) {
+        addTo.Add(modToAdd);
+    }
+
+    public void AddMultipleModifiers(List<StatMod> modsToAdd, List<StatMod> addTo) {
+        foreach (StatMod mod in modsToAdd) {
+            addTo.Add(mod);
+        }
+    }
+
+    public bool RemoveModifier(StatMod modToRemove, List<StatMod> removeFrom) {
+        if (removeFrom.Remove(modToRemove)) {
+            return true;
+        }
+        return false;
+    }
+
+    public bool RemoveModifierFromSource(object source, List<StatMod> removeFrom) {
+        bool removed = false;
+        for (int i = removeFrom.Count; i >= 0; i--) {
+            if (removeFrom[i] == source) {
+                removed = true;
+                removeFrom.RemoveAt(i);
             }
         }
-        protected List<StatModifier> _baseValueModifiers;
-        public virtual List<StatModifier> BaseValueModifiers { get { return _baseValueModifiers; } }
 
-        public Stat(string name, float baseValue = 5f)
-        {        
-            _name = name;
-            _baseValue = baseValue;
-            _baseValueModifiers = new List<StatModifier>();
-        }
+        return removed;
+    }
 
-        public void AddModifier(StatModifier modToAdd, List<StatModifier> addTo)
-        {
-            addTo.Add(modToAdd);
-        }
+    protected float ApplyModifiers(float statBase, List<StatMod> statModifiers) {
+        float finalValue = statBase;
 
-        public void AddMultipleModifiers(List<StatModifier> modsToAdd, List<StatModifier> addTo)
-        {
-            foreach(StatModifier mod in modsToAdd)
-            {
-                addTo.Add(mod);
-            }
-        }
-
-        public bool RemoveModifier(StatModifier modToRemove, List<StatModifier> removeFrom)
-        {
-            if(removeFrom.Remove(modToRemove))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public bool RemoveModifierFromSource(object source, List<StatModifier> removeFrom)
-        {
-            bool removed = false;
-            for(int i = removeFrom.Count;  i >= 0; i--)
-            {
-                if(removeFrom[i] == source)
-                {
-                    removed = true;
-                    removeFrom.RemoveAt(i);
-                }
-            }
-            return removed;
-        }
-
-        protected float ApplyModifiers(float _base, List<StatModifier> statModifiers)
-        {
-            float finalValue = _base;
-
+        if (statModifiers.Count > 0) {
             statModifiers.Sort((x, y) => x.Type.CompareTo(y.Type));
 
-            for(int i = 0; i < statModifiers.Count; i++)
-            {
-                StatModifier modifier = statModifiers[i];
-                if(modifier.Type == ModifierOperationType.Additive)
-                {
+            for (int i = 0; i < statModifiers.Count; i++) {
+                StatMod modifier = statModifiers[i];
+                if (modifier.Type == StatMod.ModType.Additive) {
                     finalValue += modifier.Value;
                 }
-                else if(modifier.Type != ModifierOperationType.Multiplicative)
-                {
+                else if (modifier.Type == StatMod.ModType.Multiplicative) {
                     finalValue *= modifier.Value;
                 }
             }
-
-            return finalValue;
         }
+
+        return finalValue;
     }
+}

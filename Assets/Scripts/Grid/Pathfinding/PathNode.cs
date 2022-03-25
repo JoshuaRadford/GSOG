@@ -1,83 +1,37 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+public class PathNode {
+    // External Data
+    public Cell parentCell;
 
-public class PathNode
-{
-    public GridSystem<Tile> parentGrid;
+    // Internal Data
     public int x;
     public int y;
+    private int _weight;
+    public int Weight { get => _weight; set { _weight = value; parentCell.ParentGrid.TriggerGridObjectChanged(x, y); } }
 
+    // Dependent Data
+    public bool isWalkable;
+
+    // Temp Data
     public int gCost;
     public int hCost;
-    public int fCost;
-
-    private int weight;
-    public bool isWalkable;
+    public int fCost => gCost + hCost;
     public PathNode cameFromNode;
 
-    public PathNode(GridSystem<Tile> grid, int x, int y, int weight = 0)
-    {
-        this.parentGrid = grid;
+    public PathNode(Cell cell, int x, int y, int weight = 0) {
+        this.parentCell = cell;
         this.x = x;
         this.y = y;
-        this.weight = weight;
+        this._weight = weight;
         this.isWalkable = true;
     }
 
-    public int CalculateFCost()
-    {
-        return fCost = gCost + hCost;
+    public bool SetIsWalkable(bool isWalkable) {
+        this.isWalkable = isWalkable;
+        parentCell.ParentGrid.TriggerGridObjectChanged(x, y);
+        return this.isWalkable;
     }
 
-    public int GetWeight()
-    {
-        return weight;
-    }
-
-    public void SetWeight(int weight)
-    {
-        this.weight = weight;
-        parentGrid.TriggerGridObjectChanged(x, y);
-    }
-
-    public void SetIsWalkable(bool isWalkable)
-    {
-        this.isWalkable=isWalkable;
-        parentGrid.TriggerGridObjectChanged(x, y);
-    }
-
-    public override string ToString()
-    {
+    public override string ToString() {
         return x + "," + y;
-    }
-
-    /*
-     * Save - Load
-     */
-    /*
-     * Details:
-     * Fields included here can be any features you want to save within each object.
-     */
-    [System.Serializable]
-    public class SaveObject
-    {
-        public int weight;
-        public bool isWalkable;
-    }
-
-    public SaveObject Save()
-    {
-        return new SaveObject
-        {
-            weight = weight,
-            isWalkable = isWalkable,
-        };
-    }
-
-    public void Load(SaveObject saveObject)
-    {
-        weight = saveObject.weight;
-        isWalkable=saveObject.isWalkable;
     }
 }
