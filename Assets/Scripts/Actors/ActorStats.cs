@@ -9,18 +9,8 @@ public class ActorStats {
     public delegate void CharacterStatsChanged();
     public CharacterStatsChanged OnStatsChanged;
 
-    public ActorStats() {
-        stats = new List<Stat>()
-        {
-            new Stat("Strength"),
-            new Stat("Dexterity"),
-            new Stat("Endurance"),
-            new Stat("Wisdom"),
-            new Stat("Charisma"),
-            new Resource("Health"),
-            new Resource("Stamina"),
-            new Resource("Mana"),
-        };
+    public ActorStats(List<Stat> statList = null) {
+        stats = statList;
     }
 
     public Stat GetStatByName(string name) {
@@ -36,7 +26,7 @@ public class ActorStats {
         if (stat == null) return false;
         if (stat is Resource) stat = (Resource)stat;
 
-        stat.BaseValue = value;
+        stat.SetBaseValue(value);
         OnStatsChanged?.Invoke();
         return true;
     }
@@ -45,7 +35,7 @@ public class ActorStats {
         Resource resource = GetResourceByName(name);
         if (resource == null) return false;
 
-        resource.MaxValue = max;
+        resource.SetMaxValue(max);
         OnStatsChanged?.Invoke();
         return true;
     }
@@ -54,31 +44,16 @@ public class ActorStats {
         Resource resource = GetResourceByName(name);
         if (resource == null) return false;
 
-        resource.BaseValue = resource.MaxValue;
+        resource.SetBaseValue(resource.GetMaxValue());
         OnStatsChanged?.Invoke();
         return true;
     }
 
     public bool IncrementStatBaseValue(string name, int amount) {
-        return SetStatBaseValue(name, GetStatByName(name).BaseValue + amount);
+        return SetStatBaseValue(name, GetStatByName(name).GetBaseValue() + amount);
     }
 
     public bool IncrementResourceMax(string name, int amount) {
-        return SetResourceMax(name, GetResourceByName(name).MaxValue + amount);
-    }
-
-    public int GetHealthValue() {
-        Stat s = GetStatByName("Health");
-        return (s != null) ? s.ModifiedValue : 0;
-    }
-
-    public int GetMoveRange() {
-        Stat s = GetStatByName("Stamina");
-        return (s != null) ? s.ModifiedValue : 0;
-    }
-
-    public int GetInitiative() {
-        Stat s = GetStatByName("Dexterity");
-        return (s != null) ? s.ModifiedValue : 0;
+        return SetResourceMax(name, GetResourceByName(name).GetMaxValue() + amount);
     }
 }

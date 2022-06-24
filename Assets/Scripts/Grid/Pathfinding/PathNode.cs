@@ -1,15 +1,18 @@
-public class PathNode {
-    // External Data
-    public Cell parentCell;
+using UnityEngine;
 
+public class PathNode {
     // Internal Data
-    public int x;
-    public int y;
+    private int _x;
+    private int _y;
     private int _weight;
-    public int Weight { get => _weight; set { _weight = value; parentCell.ParentGrid.TriggerGridObjectChanged(x, y); } }
+    public int X { get => _x; set { if (_x != value) _x = value; } }
+    public int Y { get => _y; set { if (_y != value) _y = value; } }
+    public int Weight { get => _weight; set { if (_weight != value) _weight = value; } }
 
     // Dependent Data
-    public bool isWalkable;
+    [SerializeField]
+    private bool _walkable;
+    public bool Walkable { get => _walkable; set { if (_walkable != value) _walkable = value; } }
 
     // Temp Data
     public int gCost;
@@ -17,21 +20,16 @@ public class PathNode {
     public int fCost => gCost + hCost;
     public PathNode cameFromNode;
 
-    public PathNode(Cell cell, int x, int y, int weight = 0) {
-        this.parentCell = cell;
-        this.x = x;
-        this.y = y;
-        this._weight = weight;
-        this.isWalkable = true;
+    public PathNode(int x, int y, int weight = 0) {
+        X = x;
+        Y = y;
+        Weight = weight;
+        Walkable = true;
     }
 
-    public bool SetIsWalkable(bool isWalkable) {
-        this.isWalkable = isWalkable;
-        parentCell.ParentGrid.TriggerGridObjectChanged(x, y);
-        return this.isWalkable;
-    }
+    public Vector2Int GetXY() { return new Vector2Int(X, Y); }
 
     public override string ToString() {
-        return x + "," + y;
+        return $"({X},{Y}) : Weight ({Weight}) : Walkable ({Walkable})";
     }
 }

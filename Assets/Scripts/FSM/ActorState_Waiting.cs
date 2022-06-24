@@ -1,31 +1,69 @@
+using UnityEngine;
 using System.Collections.Generic;
 
 public class ActorState_Waiting : IActorState {
-    public IActorState DoState(ActorBehavior ai) {
-        List<PathNode> pathToClosestHostile = ai.GetPathToClosestHostile();
-        Actor closestHostile = ai.GetClosestHostile(Manager_Grid.TerrainOverlay);
-        HashSet<PathNode> walkables = ai.parentActor.Movement.GetWalkables(Manager_Grid.TerrainOverlay);
-        bool foundClosestHostile = ai.parentActor.Movement.IsNeighbor(closestHostile, Manager_Grid.TerrainOverlay);
+    Actor parent;
 
+    public ActorState_Waiting(Actor parent) {
+        this.parent = parent;
+    }
 
-        if (ai.TryMoveAtClosestHostile()) {
-            return ai.seekingState;
+    public void Enter(params object[] args) {
+        if (parent == null) return;
+
+        // Handle Animation
+        parent.Animator.SetTrigger("ToIdle");
+
+        // Everything after this is AI instructions
+        if (!parent.enableAI) return;
+
+        // Movement data
+        bool canMove = ActorUtils.CanMove(parent, parent.NavGrid.navigationGrid);
+
+        // Hostile data
+        Actor closestHostile = ActorUtils.GetClosestHostile(parent, parent.NavGrid.navigationGrid);
+        List<Vector2Int> pathToClosestHostile = ActorUtils.GetPathToActor(parent, closestHostile);
+
+        // Found path to closest hostile
+        if (canMove && pathToClosestHostile != null && pathToClosestHostile.Count > 0) {
+            // Try seek closest hostile
+            parent.Wait(0.5f, () => ActorUtils.TryMoveAtActor(parent, closestHostile));
+            return;
         }
+        // No path connecting to hostile
         else {
-            if (!ai.parentActor.ExpendedSA) {
+            // Hasn't expended standard action
+            if (!parent.ExpendedSA) {
+                bool foundClosestHostile = ActorUtils.IsNeighbor(parent, closestHostile);
+                // A hostile is in range
                 if (foundClosestHostile) {
-                    return ai.attackingState;
+                    // Attack that hostile
+                    parent.Wait(0.5f, () => { parent.SetBehaviorState(parent.STATE_ATTACKING);});
+                    return;
                 }
-
-                ai.TryDashAction();
-                return ai.waitingState;
+                // No hostile in range
+                else {
+                    // Try dash action
+                    parent.Wait(0.5f, () => {
+                        ActorUtils.TryDashAction(parent);
+                        parent.SetBehaviorState(parent.STATE_WAITING);
+                    });
+                    return;
+                }
             }
         }
 
 
+        // No other possible actions
 
+        // End turn
+        parent.Wait(1f, () => CombatManager.StepInitiative());
+        return;
+    }
 
-        Manager_GridCombat.StepInitiative();
-        return ai.idleState;
+    public void DoState() {
+    }
+
+    public void Exit() {
     }
 }

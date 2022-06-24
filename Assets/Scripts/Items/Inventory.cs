@@ -5,7 +5,6 @@ using UnityEngine;
 [System.Serializable]
 public class Inventory : ScriptableObject {
     [SerializeField] private Dictionary<string, Item> items = new Dictionary<string, Item>();
-
     public Dictionary<string, Item> Items => items;
 
     public void AddItem(Item _item) {
@@ -16,11 +15,21 @@ public class Inventory : ScriptableObject {
         return items.Remove(_item.UniqueID);
     }
 
-    public int GetCountOfName(string _name) {
+    public virtual int GetCountOfItem(string _name) {
         int count = 0;
 
         foreach (Item _item in items.Values) {
             if (_item.Name == _name) count++;
+        }
+
+        return count;
+    }
+
+    public int GetCountOfItem_ID(string _id) {
+        int count = 0;
+
+        foreach (Item _item in items.Values) {
+            if (_item.UniqueID == _id) count++;
         }
 
         return count;

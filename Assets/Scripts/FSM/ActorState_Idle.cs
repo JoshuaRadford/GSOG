@@ -1,5 +1,16 @@
 public class ActorState_Idle : IActorState {
-    public IActorState DoState(ActorBehavior ai) {
-        return ai.idleState;
+    Actor parent;
+
+    public ActorState_Idle(Actor parent) {
+        this.parent = parent;
+    }
+
+    public void Enter(params object[] args) {
+    }
+
+    public void DoState() {
+    }
+
+    public void Exit() {
     }
 }
